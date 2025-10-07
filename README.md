@@ -23,19 +23,19 @@
     # source .venv/bin/activate
     ```
 
-4.  **必要なライブラリのインストール**
-    `requirements.txt`ファイルを使用して、必要なPythonライブラリをインストールします。
+4.  **必要なライブラリのインストール**  
+    `requirements.txt`ファイルを使用して、必要なPythonライブラリをインストールします。  
     ```bash
     pip install -r requirements.txt
     ```
 
-5.  **接続情報の設定**
+5.  **接続情報の設定**  
     本アプリケーションはAzure OpenAI Serviceを利用するため、接続情報の設定が必要です。
-    
-    1. プロジェクトルートにある `.env.example` ファイルをコピーし、`.env` という名前のファイルを作成します。
-    2. 作成した `.env` ファイルを開き、サンプルを参考に4つの必須項目（APIキー、エンドポイント、APIバージョン、デプロイ名）をすべて設定してください。
-    
-    ```.env
+
+    1. プロジェクトルートにある `.env.example` ファイルをコピーし、`.env` という名前のファイルを作成します。  
+    2. 作成した `.env` ファイルを開き、サンプルを参考に4つの必須項目（APIキー、エンドポイント、APIバージョン、デプロイ名）をすべて設定してください。  
+
+    ```env
     # Azure OpenAI Serviceの接続情報をここに設定してください
 
     # APIキー (必須)
@@ -53,14 +53,43 @@
     # 例: gpt-4
     AZURE_OPENAI_DEPLOYMENT=...
     ```
-    
+
     **注意**: `.env` ファイルは `.gitignore` により、Gitリポジトリには追加されない設定になっています。すべての値が設定されていない場合、アプリケーションは起動時にエラーとなります。
 
-6.  **Azure Functions Core Toolsのインストール** (任意)
-    このプロジェクトはAzure Functionsを利用しているため、ローカルでの実行やデバッグには[Azure Functions Core Tools](https://learn.microsoft.com/ja-jp/azure/azure-functions/functions-run-local)が必要です。インストールされていない場合は、リンク先の手順に従ってインストールしてください。
+6.  **CORSの設定**  
+    外部クライアント（例: フロントエンドアプリ）からのアクセスを許可するため、CORS設定を行います。
 
-7.  **ローカルでの実行**
-    Azure Functions Core Toolsを使用して、ローカルで関数を起動します。
+    - ローカル開発時は、`local.settings.json` に以下を追加してください：
+
+    ```json
+    {
+      "IsEncrypted": false,
+      "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "python"
+      },
+      "Host": {
+        "CORS": "*"
+      }
+    }
+    ```
+
+    > `"CORS": "*"` はすべてのオリジンを許可します。セキュリティ上、本番環境では特定のドメインに限定してください。
+
+    - 本番環境では、Azure CLI または Azure Portal を使用して CORS を設定します。
+
+    ```bash
+    az functionapp cors add \
+      --name <FunctionApp名> \
+      --resource-group <リソースグループ名> \
+      --allowed-origins https://your-frontend-app.com
+    ```
+
+7.  **Azure Functions Core Toolsのインストール**  
+    このプロジェクトはAzure Functionsを利用しているため、ローカルでの実行やデバッグには [Azure Functions Core Tools](https://learn.microsoft.com/ja-jp/azure/azure-functions/functions-run-local) が必要です。インストールされていない場合は、リンク先の手順に従ってインストールしてください。
+
+8.  **ローカルでの実行**  
+    Azure Functions Core Toolsを使用して、ローカルで関数を起動します。  
     ```bash
     func start
     ```
